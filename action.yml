@@ -1,0 +1,11 @@
+name: "rust-ci"
+description: "build x86_64, aarch64 linux rust binary fast"
+inputs:
+    package:
+        description: "The list of packages to build(separated with ,)"
+        required: true
+runs:
+    using: "node12"
+    steps:
+        - run: node dist/index.js ${{ inputs.package }}
+          shell: bash
