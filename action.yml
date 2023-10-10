@@ -9,6 +9,11 @@ inputs:
         required: false
         type: boolean
         default: true
+    install-openssl:
+        description: "Will install openssl for aarch64 for you"
+        required: false
+        type: boolean
+        default: false
 runs:
     using: "node12"
     main: dist/index.js
