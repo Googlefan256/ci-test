@@ -7,7 +7,7 @@
         "rootDir": "./src",
         "declaration": true,
         "outDir": "./dist",
-        "emitDeclarationOnly": true,
+        "noEmit": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "isolatedModules": true,

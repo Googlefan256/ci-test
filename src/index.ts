@@ -1,5 +1,6 @@
 import { redBright, yellowBright } from "chalk";
 import { spawn } from "node:child_process";
+import { getInput } from "@actions/core";
 
 function error(msg: string) {
     console.error(`${redBright("ERROR")}: ${msg}`);
@@ -7,11 +8,7 @@ function error(msg: string) {
 }
 
 function splitArgs() {
-    const arg = process.argv[2];
-    if (!arg) {
-        return [];
-    }
-    return arg.split(",");
+    return getInput("package").split(",");
 }
 
 async function $(cmd: string): Promise<undefined> {
