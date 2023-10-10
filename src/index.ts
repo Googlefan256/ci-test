@@ -42,7 +42,7 @@ let openssl_dir: string | null = null;
 let openssl_lib_dir: string | null = null;
 
 async function doInstallOpenssl() {
-    const doInstall = getBooleanInput("install-openss");
+    const doInstall = getBooleanInput("install-openssl");
     if (doInstall) {
         if (!existsSync("target/openssl-aarch64")) {
             await $("mkdir -p target");
