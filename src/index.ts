@@ -53,13 +53,22 @@ async function doInstallOpenssl() {
                 "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb  data.tar.xz | tar Jxvf -",
             );
             await $("rm -rf libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
-            await $("mv usr target/openssl-aarch64");
+            const dir = process.env.GITHUB_WORKSPACE || __dirname;
             await $(
-                "cp target/openssl-aarch64/include/aarch64-linux-gnu/openssl/opensslconf.h target/openssl-aarch64/include/openssl",
+                `mv usr cp ${join(resolve(dir), "target/openssl-aarch64")}`,
             );
-            openssl_dir = join(resolve(__dirname), "target/openssl-aarch64");
+            await $(
+                `cp ${join(
+                    resolve(dir),
+                    "target/openssl-aarch64/include/aarch64-linux-gnu/openssl/opensslconf.h",
+                )} ${join(
+                    resolve(dir),
+                    "target/openssl-aarch64/include/openssl",
+                )}`,
+            );
+            openssl_dir = join(resolve(dir), "target/openssl-aarch64");
             openssl_lib_dir = join(
-                resolve(__dirname),
+                resolve(dir),
                 "target/openssl-aarch64/lib/aarch64-linux-gnu",
             );
         }
