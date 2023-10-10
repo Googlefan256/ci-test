@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
-    "repository": "https://github.com/Googlefan256/ci-test",
+    "repository": "https://github.com/neodyland/rust-ci",
     "author": "Neodyland <npm.webmaster@neody.org>",
     "license": "MIT",
     "devDependencies": {
