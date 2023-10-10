@@ -6,6 +6,4 @@ inputs:
         required: true
 runs:
     using: "node12"
-    steps:
-        - run: node dist/index.js ${{ inputs.package }}
-          shell: bash
+    main: dist/index.js
