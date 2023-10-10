@@ -1,6 +1,6 @@
-import { redBright, yellowBright } from "chalk";
+import { redBright } from "chalk";
 import { spawn } from "node:child_process";
-import { getInput } from "@actions/core";
+import { getInput, getBooleanInput } from "@actions/core";
 
 function error(msg: string) {
     console.error(`${redBright("ERROR")}: ${msg}`);
@@ -23,7 +23,18 @@ async function $(cmd: string): Promise<undefined> {
     });
 }
 
+async function doInstallRust() {
+    const doInstall = getBooleanInput("install-rustup");
+    if (doInstall) {
+        const output = "install-rust-arandompath.sh";
+        await $(`curl https://sh.rustup.rs -o ${output}`);
+        await $(`sh ${output} -y`);
+        await $(`rm ${output}`);
+    }
+}
+
 async function main() {
+    await doInstallRust();
     const packages = splitArgs();
     if (!packages.length) {
         return error("no build binary specified");
