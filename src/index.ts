@@ -55,7 +55,7 @@ async function doInstallOpenssl() {
             await $("rm -rf libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
             const dir = process.env.GITHUB_WORKSPACE || __dirname;
             await $(
-                `mv usr cp ${join(resolve(dir), "target/openssl-aarch64")}`,
+                `mv usr ${join(resolve(dir), "target/openssl-aarch64")}`,
             );
             await $(
                 `cp ${join(
