@@ -83,10 +83,10 @@ async function main() {
     for (const pkg of packages) {
         let env = undefined;
         if (openssl_dir && openssl_lib_dir) {
-            env = {
+            env = Object.assign(process.env, {
                 AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_DIR: openssl_dir,
                 AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR: openssl_lib_dir,
-            };
+            }) as Record<string, string>;
         }
         await $(
             `cargo build --target aarch64-unknown-linux-gnu --release --config target.aarch64-unknown-linux-gnu.linker=\\\"aarch64-linux-gnu-gcc\\\" --package ${pkg}`,
