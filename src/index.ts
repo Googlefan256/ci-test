@@ -2,6 +2,7 @@ import { redBright, greenBright } from "chalk";
 import { getInput, getBooleanInput } from "@actions/core";
 import { exec } from "@actions/exec";
 import { mkdirP, mv, rmRF, cp } from "@actions/io";
+import { spawn } from "child_process";
 
 function trygetBooleanInput(n: string) {
     try {
@@ -26,8 +27,20 @@ function splitArgs() {
 
 async function $(
     cmd: string,
-    env?: Record<string, string>,
+    env?: Record<string, string> | undefined,
+    shell = false,
 ): Promise<undefined> {
+    if (shell) {
+        const cp = spawn(cmd, { stdio: "inherit", env, shell: true });
+        return new Promise((resolve) => {
+            cp.once("exit", (code) => {
+                if (code !== 0) {
+                    error(`command didn't exit successfully(${code}): ${cmd}`);
+                }
+                return resolve(undefined);
+            });
+        });
+    }
     const code = await exec(cmd, undefined, {
         env,
     });
@@ -60,6 +73,8 @@ async function doInstallOpenssl() {
         );
         await $(
             "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb data.tar.xz | tar Jxvf -",
+            undefined,
+            true,
         );
         await rmRF("libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
         await mv("usr", "target/openssl-aarch64");
