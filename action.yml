@@ -15,5 +15,5 @@ inputs:
         type: boolean
         default: false
 runs:
-    using: "node12"
+    using: "node18"
     main: dist/index.js

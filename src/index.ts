@@ -1,12 +1,16 @@
-import { redBright } from "chalk";
-import { spawn } from "node:child_process";
+import { redBright, greenBright } from "chalk";
 import { getInput, getBooleanInput } from "@actions/core";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { exec } from "@actions/exec";
 
 function error(msg: string) {
     console.error(`${redBright("ERROR")}: ${msg}`);
     return process.exit(1);
+}
+
+function info(msg: string) {
+    console.log(`${greenBright("INFO")}: ${msg}`);
 }
 
 function splitArgs() {
@@ -17,15 +21,13 @@ async function $(
     cmd: string,
     env?: Record<string, string>,
 ): Promise<undefined> {
-    const ps = spawn(cmd, { shell: "sh", stdio: "inherit", env });
-    return new Promise((resolve) => {
-        ps.on("exit", (code) => {
-            if (code !== 0) {
-                error(`command didn't exit successfully(${code}): ${cmd}`);
-            }
-            resolve(undefined);
-        });
+    const code = await exec(cmd, undefined, {
+        env,
     });
+    if (code !== 0) {
+        error(`command didn't exit successfully(${code}): ${cmd}`);
+    }
+    return undefined;
 }
 
 async function doInstallRust() {
@@ -69,6 +71,7 @@ async function doInstallOpenssl() {
                 resolve(dir),
                 "target/openssl-aarch64/lib/aarch64-linux-gnu",
             );
+            info(`OPENSSL DIR set to: ${openssl_dir}`);
         }
     }
 }
