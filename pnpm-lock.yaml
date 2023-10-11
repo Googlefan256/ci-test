@@ -6,8 +6,8 @@ settings:
 
 dependencies:
     "@actions/cache":
-        specifier: 3.0.6
-        version: 3.0.6
+        specifier: 2.0.6
+        version: 2.0.6
     "@actions/core":
         specifier: ^1.10.1
         version: 1.10.1
@@ -45,10 +45,10 @@ devDependencies:
         version: 5.2.2
 
 packages:
-    /@actions/cache@3.0.6:
+    /@actions/cache@2.0.6:
         resolution:
             {
-                integrity: sha512-Tttit+nqmxgb2M5Ufj5p8Lwd+fx329HOTLzxMrY4aaaZqBzqetgWlEfszMyiXfX4cJML+bzLJbyD9rNYt8TJ8g==,
+                integrity: sha512-Z39ZrWaTRRPaV/AOQdY7hve+Iy/HloH5prpz+k+0lZgGQs/3SeO0UYSIakVuXOk2pdMZnl0Nv0PoK1rmh9YfGQ==,
             }
         dependencies:
             "@actions/core": 1.10.1
@@ -56,7 +56,6 @@ packages:
             "@actions/glob": 0.1.2
             "@actions/http-client": 2.2.0
             "@actions/io": 1.1.3
-            "@azure/abort-controller": 1.1.0
             "@azure/ms-rest-js": 2.7.0
             "@azure/storage-blob": 12.16.0
             semver: 6.3.1
