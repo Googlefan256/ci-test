@@ -125,6 +125,11 @@ async function main() {
                 cacheKey ? `id ${cacheKey}` : "no cache hit"
             }`,
         );
+        info(
+            `primary key was: ${key}, additional keys were: ${restoreKeys.join(
+                ",",
+            )}`,
+        );
     }
     await doInstallRust();
     await doInstallOpenssl();
