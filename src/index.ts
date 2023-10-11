@@ -119,7 +119,12 @@ async function main() {
     const willCache = getBooleanInput("cache");
     if (willCache) {
         const key = `${type()}-CrossBuild-${await hashFiles()}`;
-        const _cacheKey = await restoreCache(paths, key, restoreKeys);
+        const cacheKey = await restoreCache(paths, key, restoreKeys);
+        info(
+            `restored cache with ${
+                cacheKey ? `id ${cacheKey}` : "no cache hit"
+            }`,
+        );
     }
     await doInstallRust();
     await doInstallOpenssl();
@@ -135,21 +140,27 @@ async function main() {
         "rustup target add aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu",
     );
     for (const pkg of packages) {
-        let env = undefined;
+        let env: Record<string, string> = process.env as Record<string, string>;
         if (openssl_dir && openssl_lib_dir) {
             env = {
-                ...process.env,
+                ...env,
                 AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_DIR: openssl_dir,
                 AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR: openssl_lib_dir,
             };
         }
+        if (willCache) {
+            env = {
+                ...env,
+                CARGO_INCREMENTAL: "1",
+            };
+        }
         await $(
             `cargo build --target aarch64-unknown-linux-gnu --release --config target.aarch64-unknown-linux-gnu.linker='aarch64-linux-gnu-gcc' --package ${pkg}`,
-            { ...env, CARGO_INCREMENTAL: "1" },
+            env,
         );
         await $(
             `cargo build --target x86_64-unknown-linux-gnu --release --config target.x86_64-unknown-linux-gnu.linker='x86_64-linux-gnu-gcc' --package ${pkg}`,
-            { ...process.env, CARGO_INCREMENTAL: "1" },
+            env,
         );
     }
     await rmRF(".out");
