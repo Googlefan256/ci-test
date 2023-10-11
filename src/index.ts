@@ -1,6 +1,5 @@
 import { redBright, greenBright } from "chalk";
 import { getInput, getBooleanInput } from "@actions/core";
-import { existsSync } from "node:fs";
 import { exec } from "@actions/exec";
 import { mkdirP, mv, rmRF, cp } from "@actions/io";
 
@@ -46,24 +45,23 @@ let openssl_lib_dir: string | null = null;
 async function doInstallOpenssl() {
     const doInstall = getBooleanInput("install-openssl");
     if (doInstall) {
-        if (!existsSync("target/openssl-aarch64")) {
-            await mkdirP("target");
-            await $(
-                "curl -O http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl-dev_1.1.1n-0+deb10u6_arm64.deb",
-            );
-            await $(
-                "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb  data.tar.xz | tar Jxvf -",
-            );
-            await rmRF("libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
-            await mv("usr", "target/openssl-aarch64");
-            await cp(
-                "target/openssl-aarch64/include/aarch64-linux-gnu/openssl/opensslconf.h",
-                "target/openssl-aarch64/include/openssl",
-            );
-            openssl_dir = "target/openssl-aarch64";
-            openssl_lib_dir = "target/openssl-aarch64/lib/aarch64-linux-gnu";
-            info(`openssl installed`);
-        }
+        await rmRF("target/openssl-aarch64");
+        await mkdirP("target");
+        await $(
+            "curl -O http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl-dev_1.1.1n-0+deb10u6_arm64.deb",
+        );
+        await $(
+            "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb  data.tar.xz | tar Jxvf -",
+        );
+        await rmRF("libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
+        await mv("usr", "target/openssl-aarch64");
+        await cp(
+            "target/openssl-aarch64/include/aarch64-linux-gnu/openssl/opensslconf.h",
+            "target/openssl-aarch64/include/openssl",
+        );
+        openssl_dir = "target/openssl-aarch64";
+        openssl_lib_dir = "target/openssl-aarch64/lib/aarch64-linux-gnu";
+        info(`openssl installed`);
     }
 }
 
