@@ -3,6 +3,14 @@ import { getInput, getBooleanInput } from "@actions/core";
 import { exec } from "@actions/exec";
 import { mkdirP, mv, rmRF, cp } from "@actions/io";
 
+function trygetBooleanInput(n: string) {
+    try {
+        return getBooleanInput(n);
+    } catch {
+        return false;
+    }
+}
+
 function error(msg: string) {
     console.error(`${redBright("ERROR")}: ${msg}`);
     return process.exit(1);
@@ -30,7 +38,7 @@ async function $(
 }
 
 async function doInstallRust() {
-    const doInstall = getBooleanInput("install-rustup");
+    const doInstall = trygetBooleanInput("install-rustup");
     if (doInstall) {
         const output = "install-rust-arandompath.sh";
         await $(`curl https://sh.rustup.rs -o ${output}`);
@@ -43,7 +51,7 @@ let openssl_dir: string | null = null;
 let openssl_lib_dir: string | null = null;
 
 async function doInstallOpenssl() {
-    const doInstall = getBooleanInput("install-openssl");
+    const doInstall = trygetBooleanInput("install-openssl");
     if (doInstall) {
         await rmRF("target/openssl-aarch64");
         await mkdirP("target");
@@ -51,7 +59,7 @@ async function doInstallOpenssl() {
             "curl -O http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl-dev_1.1.1n-0+deb10u6_arm64.deb",
         );
         await $(
-            "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb  data.tar.xz | tar Jxvf -",
+            "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb data.tar.xz | tar Jxvf -",
         );
         await rmRF("libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
         await mv("usr", "target/openssl-aarch64");
