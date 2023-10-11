@@ -14,6 +14,14 @@ inputs:
         required: false
         type: boolean
         default: false
+    cache:
+        description: "Cache rust for you"
+        required: false
+        type: boolean
+        default: true
+    cache-key:
+        description: "The cache key(`${{ hashFiles('**/Cargo.lock') }}` or something)"
+        required: true
 runs:
     using: "node20"
     main: dist/index.js

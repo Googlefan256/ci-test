@@ -5,6 +5,16 @@ import { mkdirP, mv, rmRF, cp } from "@actions/io";
 import { spawn } from "child_process";
 import { existsSync } from "node:fs";
 import { resolve, join } from "node:path";
+import { saveCache, restoreCache } from "@actions/cache";
+import { type } from "node:os";
+
+const paths = [
+    "target/",
+    "~/.cargo/bin/",
+    "~/.cargo/registry/index/",
+    "~/.cargo/registry/cache/",
+    "~/.cargo/git/db/",
+];
 
 function trygetBooleanInput(n: string) {
     try {
@@ -100,8 +110,15 @@ async function doInstallOpenssl() {
         openssl_lib_dir = path("openssl-aarch64/lib/aarch64-linux-gnu");
     }
 }
+const restoreKeys = [`${type()}-CrossBuild-`];
 
 async function main() {
+    const willCache = getBooleanInput("cache");
+    if (willCache) {
+        const hashFiles = getInput("cache-key");
+        const key = `${type()}-CrossBuild-${hashFiles}`;
+        const _cacheKey = await restoreCache(paths, key, restoreKeys);
+    }
     await doInstallRust();
     await doInstallOpenssl();
     const packages = splitArgs();
@@ -142,6 +159,11 @@ async function main() {
         await $(
             `x86_64-linux-gnu-strip target/x86_64-unknown-linux-gnu/release/${pkg} -o .out/x86-64/${pkg}`,
         );
+    }
+    if (willCache) {
+        const hashFiles = getInput("cache-key");
+        const key = `${type()}-CrossBuild-${hashFiles}`;
+        const _cacheId = await saveCache(paths, key);
     }
 }
 
