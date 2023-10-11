@@ -168,18 +168,18 @@ async function main() {
             env,
         );
     }
-    await rmRF(".out");
-    await mkdirP(".out");
-    await mkdirP(".out/aarch64");
-    await mkdirP(".out/x86-64");
+    await rmRF("./.out");
+    await mkdirP("./.out");
+    await mkdirP("./.out/aarch64");
+    await mkdirP("./.out/x86-64");
     for (const pkg of packages) {
         await $(
-            `aarch64-linux-gnu-strip target/aarch64-unknown-linux-gnu/release/${pkg} -o .out/aarch64/${pkg}`,
+            `aarch64-linux-gnu-strip target/aarch64-unknown-linux-gnu/release/${pkg} -o ./.out/aarch64/${pkg}`,
             undefined,
             true,
         );
         await $(
-            `x86_64-linux-gnu-strip target/x86_64-unknown-linux-gnu/release/${pkg} -o .out/x86-64/${pkg}`,
+            `x86_64-linux-gnu-strip target/x86_64-unknown-linux-gnu/release/${pkg} -o ./.out/x86-64/${pkg}`,
             undefined,
             true,
         );
@@ -188,7 +188,7 @@ async function main() {
         const key = `${type()}-CrossBuild-${await hashFiles()}`;
         const _cacheId = await saveCache(paths, key);
     }
-    const outResolved = resolve(".out");
+    const outResolved = resolve("./.out");
     setOutput("file", outResolved);
 }
 
