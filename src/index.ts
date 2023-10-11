@@ -1,8 +1,8 @@
 import { redBright, greenBright } from "chalk";
 import { getInput, getBooleanInput } from "@actions/core";
 import { existsSync } from "node:fs";
-import { join, resolve } from "node:path";
 import { exec } from "@actions/exec";
+import { mkdirP, mv, rmRF, cp } from "@actions/io";
 
 function error(msg: string) {
     console.error(`${redBright("ERROR")}: ${msg}`);
@@ -46,32 +46,23 @@ let openssl_lib_dir: string | null = null;
 async function doInstallOpenssl() {
     const doInstall = getBooleanInput("install-openssl");
     if (doInstall) {
-        const dir = process.env.GITHUB_WORKSPACE || __dirname;
-        if (!existsSync(`${join(resolve(dir), "target/openssl-aarch64")}`)) {
-            await $(`mkdir -p ${join(resolve(dir), "target")}`);
+        if (!existsSync("target/openssl-aarch64")) {
+            await mkdirP("target");
             await $(
                 "curl -O http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl-dev_1.1.1n-0+deb10u6_arm64.deb",
             );
             await $(
                 "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb  data.tar.xz | tar Jxvf -",
             );
-            await $("rm -rf libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
-            await $(`mv usr ${join(resolve(dir), "target/openssl-aarch64")}`);
-            await $(
-                `cp ${join(
-                    resolve(dir),
-                    "target/openssl-aarch64/include/aarch64-linux-gnu/openssl/opensslconf.h",
-                )} ${join(
-                    resolve(dir),
-                    "target/openssl-aarch64/include/openssl",
-                )}`,
+            await rmRF("libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
+            await mv("usr", "target/openssl-aarch64");
+            await cp(
+                "target/openssl-aarch64/include/aarch64-linux-gnu/openssl/opensslconf.h",
+                "target/openssl-aarch64/include/openssl",
             );
-            openssl_dir = join(resolve(dir), "target/openssl-aarch64");
-            openssl_lib_dir = join(
-                resolve(dir),
-                "target/openssl-aarch64/lib/aarch64-linux-gnu",
-            );
-            info(`OPENSSL DIR set to: ${openssl_dir}`);
+            openssl_dir = "target/openssl-aarch64";
+            openssl_lib_dir = "target/openssl-aarch64/lib/aarch64-linux-gnu";
+            info(`openssl installed`);
         }
     }
 }
@@ -106,10 +97,10 @@ async function main() {
             `cargo build --target x86_64-unknown-linux-gnu --release --config target.x86_64-unknown-linux-gnu.linker=\\\"x86_64-linux-gnu-gcc\\\" --package ${pkg}`,
         );
     }
-    await $("rm -rf .out");
-    await $("mkdir -p .out");
-    await $("mkdir -p .out/aarch64");
-    await $("mkdir -p .out/x86-64");
+    rmRF(".out");
+    mkdirP(".out");
+    mkdirP(".out/aarch64");
+    mkdirP(".out/x86-64");
     for (const pkg of packages) {
         await $(
             `aarch64-linux-gnu-strip target/aarch64-unknown-linux-gnu/release/${pkg} -o .out/aarch64/${pkg}`,
