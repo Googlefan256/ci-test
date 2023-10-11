@@ -3,6 +3,8 @@ import { getInput, getBooleanInput } from "@actions/core";
 import { exec } from "@actions/exec";
 import { mkdirP, mv, rmRF, cp } from "@actions/io";
 import { spawn } from "child_process";
+import { existsSync } from "node:fs";
+import { resolve, join } from "node:path";
 
 function trygetBooleanInput(n: string) {
     try {
@@ -64,27 +66,38 @@ let openssl_dir: string | null = null;
 let openssl_lib_dir: string | null = null;
 
 async function doInstallOpenssl() {
+    const base = resolve(process.env.GITHUB_WORKSPACE || __dirname);
+    function path(j?: string) {
+        if (j) {
+            return join(base, "target", j);
+        } else {
+            return join(base, "target");
+        }
+    }
     const doInstall = trygetBooleanInput("install-openssl");
     if (doInstall) {
-        await rmRF("target/openssl-aarch64");
-        await mkdirP("target");
-        await $(
-            "curl -O http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl-dev_1.1.1n-0+deb10u6_arm64.deb",
-        );
-        await $(
-            "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb data.tar.xz | tar Jxvf -",
-            undefined,
-            true,
-        );
-        await rmRF("libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
-        await mv("usr", "target/openssl-aarch64");
-        await cp(
-            "target/openssl-aarch64/include/aarch64-linux-gnu/openssl/opensslconf.h",
-            "target/openssl-aarch64/include/openssl",
-        );
-        openssl_dir = "target/openssl-aarch64";
-        openssl_lib_dir = "target/openssl-aarch64/lib/aarch64-linux-gnu";
-        info(`openssl installed`);
+        if (!existsSync(path("openssl-aarch64"))) {
+            await mkdirP(path());
+            await $(
+                "curl -O http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl-dev_1.1.1n-0+deb10u6_arm64.deb",
+            );
+            await $(
+                "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb data.tar.xz | tar Jxvf -",
+                undefined,
+                true,
+            );
+            await rmRF("libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
+            await mv("usr", path("openssl-aarch64"));
+            await cp(
+                path(
+                    "openssl-aarch64/include/aarch64-linux-gnu/openssl/opensslconf.h",
+                ),
+                path("openssl-aarch64/include/openssl"),
+            );
+            info(`openssl installed`);
+        }
+        openssl_dir = path("openssl-aarch64");
+        openssl_lib_dir = path("openssl-aarch64/lib/aarch64-linux-gnu");
     }
 }
 
