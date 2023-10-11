@@ -7,6 +7,9 @@ import { existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { saveCache, restoreCache } from "@actions/cache";
 import { type } from "node:os";
+import { glob } from "glob";
+import { readFile } from "fs/promises";
+import { createHash } from "crypto";
 
 const paths = [
     "target/",
@@ -115,8 +118,7 @@ const restoreKeys = [`${type()}-CrossBuild-`];
 async function main() {
     const willCache = getBooleanInput("cache");
     if (willCache) {
-        const hashFiles = getInput("cache-key");
-        const key = `${type()}-CrossBuild-${hashFiles}`;
+        const key = `${type()}-CrossBuild-${await hashFiles()}`;
         const _cacheKey = await restoreCache(paths, key, restoreKeys);
     }
     await doInstallRust();
@@ -161,10 +163,19 @@ async function main() {
         );
     }
     if (willCache) {
-        const hashFiles = getInput("cache-key");
-        const key = `${type()}-CrossBuild-${hashFiles}`;
+        const key = `${type()}-CrossBuild-${await hashFiles()}`;
         const _cacheId = await saveCache(paths, key);
     }
+}
+
+async function hashFiles() {
+    const locks = await glob("**/Cargo.lock", { ignore: "target/**" });
+    const hash = createHash("sha256");
+    for (const path of locks) {
+        const content = await readFile(path);
+        hash.write(content);
+    }
+    return hash.digest("base64url");
 }
 
 main();
