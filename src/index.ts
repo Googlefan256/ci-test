@@ -119,7 +119,7 @@ async function main() {
     const willCache = getBooleanInput("cache");
     if (willCache) {
         const key = `${type()}-CrossBuild-${await hashFiles()}`;
-        const cacheKey = await restoreCache(paths, key, restoreKeys);
+        const cacheKey = await restoreCache(paths.slice(), key, restoreKeys);
         info(
             `restored cache with ${
                 cacheKey ? `id ${cacheKey}` : "no cache hit"
@@ -186,7 +186,7 @@ async function main() {
     }
     if (willCache) {
         const key = `${type()}-CrossBuild-${await hashFiles()}`;
-        const _cacheId = await saveCache(paths, key);
+        const _cacheId = await saveCache(paths.slice(), key);
     }
     const outResolved = resolve("./.out");
     setOutput("file", outResolved);
