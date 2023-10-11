@@ -90,11 +90,11 @@ async function main() {
             }) as Record<string, string>;
         }
         await $(
-            `cargo build --target aarch64-unknown-linux-gnu --release --config target.aarch64-unknown-linux-gnu.linker=\"aarch64-linux-gnu-gcc\" --package ${pkg}`,
+            `cargo build --target aarch64-unknown-linux-gnu --release --config target.aarch64-unknown-linux-gnu.linker='aarch64-linux-gnu-gcc' --package ${pkg}`,
             env,
         );
         await $(
-            `cargo build --target x86_64-unknown-linux-gnu --release --config target.x86_64-unknown-linux-gnu.linker=\"x86_64-linux-gnu-gcc\" --package ${pkg}`,
+            `cargo build --target x86_64-unknown-linux-gnu --release --config target.x86_64-unknown-linux-gnu.linker='x86_64-linux-gnu-gcc' --package ${pkg}`,
         );
     }
     rmRF(".out");
