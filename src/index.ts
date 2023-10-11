@@ -44,8 +44,9 @@ let openssl_lib_dir: string | null = null;
 async function doInstallOpenssl() {
     const doInstall = getBooleanInput("install-openssl");
     if (doInstall) {
-        if (!existsSync("target/openssl-aarch64")) {
-            await $("mkdir -p target");
+        const dir = process.env.GITHUB_WORKSPACE || __dirname;
+        if (!existsSync(`${join(resolve(dir), "target/openssl-aarch64")}`)) {
+            await $(`mkdir -p ${join(resolve(dir), "target")}`);
             await $(
                 "curl -O http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl-dev_1.1.1n-0+deb10u6_arm64.deb",
             );
@@ -53,7 +54,6 @@ async function doInstallOpenssl() {
                 "ar p libssl-dev_1.1.1n-0+deb10u6_arm64.deb  data.tar.xz | tar Jxvf -",
             );
             await $("rm -rf libssl-dev_1.1.1n-0+deb10u6_arm64.deb");
-            const dir = process.env.GITHUB_WORKSPACE || __dirname;
             await $(`mv usr ${join(resolve(dir), "target/openssl-aarch64")}`);
             await $(
                 `cp ${join(
