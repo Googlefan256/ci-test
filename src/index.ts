@@ -36,10 +36,6 @@ function info(msg: string) {
     console.log(`${greenBright("INFO")}: ${msg}`);
 }
 
-function splitArgs() {
-    return getInput("package").split(",");
-}
-
 async function $(
     cmd: string,
     env: Record<string, string> | undefined = undefined,
@@ -133,7 +129,7 @@ async function main() {
     }
     await doInstallRust();
     await doInstallOpenssl();
-    const packages = splitArgs();
+    const package = getInput("package");
     if (!packages.length) {
         return error("no build binary specified");
     }
@@ -144,46 +140,33 @@ async function main() {
     await $(
         "rustup target add aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu",
     );
-    for (const pkg of packages) {
-        let env: Record<string, string> = process.env as Record<string, string>;
-        if (openssl_dir && openssl_lib_dir) {
-            env = {
-                ...env,
-                AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_DIR: openssl_dir,
-                AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR: openssl_lib_dir,
-            };
-        }
-        if (willCache) {
-            env = {
-                ...env,
-                CARGO_INCREMENTAL: "1",
-            };
-        }
-        await $(
-            `cargo build --target aarch64-unknown-linux-gnu --release --config target.aarch64-unknown-linux-gnu.linker='aarch64-linux-gnu-gcc' --package ${pkg}`,
-            env,
-        );
-        await $(
-            `cargo build --target x86_64-unknown-linux-gnu --release --config target.x86_64-unknown-linux-gnu.linker='x86_64-linux-gnu-gcc' --package ${pkg}`,
-            env,
-        );
+    let env: Record<string, string> = process.env as Record<string, string>;
+    if (openssl_dir && openssl_lib_dir) {
+        env = {
+            ...env,
+            AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_DIR: openssl_dir,
+            AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR: openssl_lib_dir,
+        };
     }
+    if (willCache) {
+        env = {
+            ...env,
+            CARGO_INCREMENTAL: "1",
+        };
+    }
+    await $(
+        `cargo build --target aarch64-unknown-linux-gnu --release --config target.aarch64-unknown-linux-gnu.linker='aarch64-linux-gnu-gcc' --package ${pkg}`,
+        env,
+    );
     await rmRF("./.out");
     await mkdirP("./.out");
     await mkdirP("./.out/aarch64");
     await mkdirP("./.out/x86-64");
-    for (const pkg of packages) {
-        await $(
-            `aarch64-linux-gnu-strip target/aarch64-unknown-linux-gnu/release/${pkg} -o ./.out/aarch64/${pkg}`,
-            undefined,
-            true,
-        );
-        await $(
-            `x86_64-linux-gnu-strip target/x86_64-unknown-linux-gnu/release/${pkg} -o ./.out/x86-64/${pkg}`,
-            undefined,
-            true,
-        );
-    }
+    await $(
+        `aarch64-linux-gnu-strip target/aarch64-unknown-linux-gnu/release/${package} -o ./.out/aarch64/${package}`,
+        undefined,
+        true,
+    );
     if (willCache) {
         const key = `${type()}-CrossBuild-${await hashFiles()}`;
         const _cacheId = await saveCache(paths.slice(), key);
