@@ -4,11 +4,9 @@ inputs:
     package:
         description: "The package to build"
         required: true
-    aarch64:
-        description: "Rust target to build by aarch64"
-        required: false
-        type: boolean
-        default: true
+    target:
+        description: "Rust target"
+        required: true
     install-rustup:
         description: "Will install rustup for you"
         required: false
