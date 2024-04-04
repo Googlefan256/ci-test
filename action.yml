@@ -2,7 +2,10 @@ name: "rust-ci"
 description: "build x86_64, aarch64 linux rust binary fast"
 inputs:
     package:
-        description: "The list of packages to build(separated with ,)"
+        description: "The package to build"
+        required: true
+    target:
+        description: "Rust target"
         required: true
     install-rustup:
         description: "Will install rustup for you"
